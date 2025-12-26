@@ -1,98 +1,172 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  useColorScheme,
+  SafeAreaView,
+  StatusBar,
+} from 'react-native';
+import { Todo } from '@/types/todo';
+import { storage, STORAGE_KEYS } from '@/utils/storage';
+import { TodoItem } from '@/components/todo-item';
+import { AddTodo } from '@/components/add-todo';
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  // Load todos from storage on mount
+  useEffect(() => {
+    const loadTodos = () => {
+      try {
+        const storedTodos = storage.getString(STORAGE_KEYS.TODOS);
+        if (storedTodos) {
+          setTodos(JSON.parse(storedTodos));
+        }
+      } catch (error) {
+        console.error('Failed to load todos:', error);
+      }
+    };
+    loadTodos();
+  }, []);
+
+  // Save todos to storage whenever they change
+  useEffect(() => {
+    try {
+      storage.set(STORAGE_KEYS.TODOS, JSON.stringify(todos));
+    } catch (error) {
+      console.error('Failed to save todos:', error);
+    }
+  }, [todos]);
+
+  const addTodo = useCallback((text: string) => {
+    const newTodo: Todo = {
+      id: Date.now().toString(),
+      text,
+      completed: false,
+      createdAt: Date.now(),
+    };
+    setTodos((prevTodos) => [newTodo, ...prevTodos]);
+  }, []);
+
+  const toggleTodo = useCallback((id: string) => {
+    setTodos((prevTodos) =>
+      prevTodos.map((todo) =>
+        todo.id === id ? { ...todo, completed: !todo.completed } : todo
+      )
+    );
+  }, []);
+
+  const deleteTodo = useCallback((id: string) => {
+    setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
+  }, []);
+
+  const activeTodos = todos.filter((todo) => !todo.completed);
+  const completedTodos = todos.filter((todo) => todo.completed);
+
+  return (
+    <SafeAreaView
+      style={[styles.container, isDark ? styles.containerDark : styles.containerLight]}
+    >
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+      
+      <View style={styles.header}>
+        <Text style={[styles.title, isDark ? styles.titleDark : styles.titleLight]}>
+          Kai Todo
+        </Text>
+        <Text style={[styles.stats, isDark ? styles.statsDark : styles.statsLight]}>
+          {activeTodos.length} active • {completedTodos.length} completed
+        </Text>
+      </View>
+
+      <View style={styles.content}>
+        <AddTodo onAdd={addTodo} />
+
+        {todos.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={[styles.emptyText, isDark ? styles.emptyTextDark : styles.emptyTextLight]}>
+              No todos yet! Add one to get started.
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={todos}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <TodoItem
+                todo={item}
+                onToggle={toggleTodo}
+                onDelete={deleteTodo}
+              />
+            )}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.listContent}
+          />
+        )}
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
+  container: {
+    flex: 1,
+  },
+  containerLight: {
+    backgroundColor: '#fff',
+  },
+  containerDark: {
+    backgroundColor: '#1c1c1c',
+  },
+  header: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 16,
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  titleLight: {
+    color: '#000',
+  },
+  titleDark: {
+    color: '#fff',
+  },
+  stats: {
+    fontSize: 14,
+  },
+  statsLight: {
+    color: '#666',
+  },
+  statsDark: {
+    color: '#999',
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  listContent: {
+    paddingBottom: 20,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
+    paddingVertical: 60,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  emptyText: {
+    fontSize: 16,
+    textAlign: 'center',
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  emptyTextLight: {
+    color: '#999',
+  },
+  emptyTextDark: {
+    color: '#666',
   },
 });
