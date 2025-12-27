@@ -4,13 +4,6 @@ import { todoApi } from './api';
 
 export type SyncStatus = 'idle' | 'syncing' | 'error' | 'offline';
 
-export interface SyncState {
-  status: SyncStatus;
-  lastSyncTime: number | null;
-  pendingChanges: number;
-  error: string | null;
-}
-
 // Get pending delete IDs from storage
 function getPendingDeletes(): string[] {
   const stored = storage.getString(STORAGE_KEYS.PENDING_DELETES);
@@ -94,19 +87,5 @@ export async function syncTodos(
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown sync error';
     return { success: false, error: message };
-  }
-}
-
-// Fetch all todos from server (initial load when online)
-export async function fetchServerTodos(): Promise<{
-  todos?: Todo[];
-  error?: string;
-}> {
-  try {
-    const todos = await todoApi.getAll();
-    return { todos };
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to fetch';
-    return { error: message };
   }
 }

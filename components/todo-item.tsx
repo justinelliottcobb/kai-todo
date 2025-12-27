@@ -43,9 +43,6 @@ export function TodoItem({
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
 
-  // Debug: Log order button state
-  console.log('TodoItem:', { id: todo.id, showOrderButtons, canMoveUp, canMoveDown });
-
   const handleSaveEdit = () => {
     const trimmedText = editText.trim();
     if (trimmedText && trimmedText !== todo.text) {

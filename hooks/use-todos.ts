@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Todo } from '@/types/todo';
 import { storage, STORAGE_KEYS } from '@/utils/storage';
 import { useNetworkStatus } from './use-network-status';
@@ -9,35 +9,53 @@ import {
   SyncStatus,
 } from '@/services/sync';
 
-export function useTodos() {
+export interface UseTodosReturn {
+  todos: Todo[];
+  activeTodos: Todo[];
+  completedTodos: Todo[];
+  addTodo: (text: string) => void;
+  toggleTodo: (id: string) => void;
+  deleteTodo: (id: string) => void;
+  editTodo: (id: string, newText: string) => void;
+  reorderTodos: (reorderedTodos: Todo[]) => void;
+  syncStatus: SyncStatus;
+  lastSyncTime: number | null;
+  syncError: string | null;
+  pendingChanges: number;
+  isOnline: boolean;
+  performSync: () => Promise<void>;
+}
+
+export function useTodos(): UseTodosReturn {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle');
   const [lastSyncTime, setLastSyncTime] = useState<number | null>(null);
   const [syncError, setSyncError] = useState<string | null>(null);
   const { isOnline } = useNetworkStatus();
+  const isInitializedRef = useRef(false);
 
   // Load todos from storage on mount
   useEffect(() => {
-    const loadTodos = () => {
-      try {
-        const storedTodos = storage.getString(STORAGE_KEYS.TODOS);
-        if (storedTodos) {
-          setTodos(JSON.parse(storedTodos));
-        }
-        // Load last sync time
-        const lastSync = storage.getString(STORAGE_KEYS.LAST_SYNC);
-        if (lastSync) {
-          setLastSyncTime(parseInt(lastSync, 10));
-        }
-      } catch (error) {
-        console.error('Failed to load todos:', error);
+    try {
+      const storedTodos = storage.getString(STORAGE_KEYS.TODOS);
+      if (storedTodos) {
+        const parsed = JSON.parse(storedTodos) as Todo[];
+        setTodos(parsed);
       }
-    };
-    loadTodos();
+      // Load last sync time
+      const lastSync = storage.getString(STORAGE_KEYS.LAST_SYNC);
+      if (lastSync) {
+        setLastSyncTime(parseInt(lastSync, 10));
+      }
+    } catch (error) {
+      console.error('Failed to load todos:', error);
+    }
+    isInitializedRef.current = true;
   }, []);
 
-  // Save todos to storage whenever they change
+  // Save todos to storage whenever they change (skip initial mount)
   useEffect(() => {
+    if (!isInitializedRef.current) return;
     try {
       storage.set(STORAGE_KEYS.TODOS, JSON.stringify(todos));
     } catch (error) {
@@ -122,10 +140,10 @@ export function useTodos() {
     }
   }, [isOnline, syncStatus, performSync]);
 
-  const pendingChanges = countPendingChanges(todos);
-  const sortedTodos = [...todos].sort((a, b) => a.order - b.order);
-  const activeTodos = sortedTodos.filter((todo) => !todo.completed);
-  const completedTodos = sortedTodos.filter((todo) => todo.completed);
+  const pendingChanges = useMemo(() => countPendingChanges(todos), [todos]);
+  const sortedTodos = useMemo(() => [...todos].sort((a, b) => a.order - b.order), [todos]);
+  const activeTodos = useMemo(() => sortedTodos.filter((todo) => !todo.completed), [sortedTodos]);
+  const completedTodos = useMemo(() => sortedTodos.filter((todo) => todo.completed), [sortedTodos]);
 
   return {
     todos: sortedTodos,

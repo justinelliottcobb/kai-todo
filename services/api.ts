@@ -19,10 +19,10 @@ export async function checkServerHealth(): Promise<boolean> {
   }
 }
 
-class ApiError extends Error {
+export class ApiError extends Error {
   constructor(
     message: string,
-    public status?: number
+    public readonly status?: number
   ) {
     super(message);
     this.name = 'ApiError';

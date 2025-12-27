@@ -9,11 +9,16 @@ export interface ServerStatus {
   lastChecked: number | null;
 }
 
+export interface UseServerStatusReturn extends ServerStatus {
+  refresh: () => Promise<boolean>;
+  isPollingEnabled: boolean;
+}
+
 interface UseServerStatusOptions {
   enabled?: boolean;
 }
 
-export function useServerStatus(options: UseServerStatusOptions = {}) {
+export function useServerStatus(options: UseServerStatusOptions = {}): UseServerStatusReturn {
   const { enabled = true } = options;
   const [isServerOnline, setIsServerOnline] = useState<boolean>(false);
   const [isChecking, setIsChecking] = useState<boolean>(enabled);

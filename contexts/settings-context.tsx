@@ -22,7 +22,7 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
     try {
       const stored = storage.getString(STORAGE_KEYS.SETTINGS);
       if (stored) {
-        const parsed = JSON.parse(stored);
+        const parsed = JSON.parse(stored) as Partial<AppSettings>;
         setSettings({ ...DEFAULT_SETTINGS, ...parsed });
       }
     } catch (error) {

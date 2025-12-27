@@ -1,0 +1,10 @@
+# Run lint-staged on staged files
+npx lint-staged
+
+# Run TypeScript type checking
+echo "Running TypeScript check..."
+npx tsc --noEmit
+
+# Run tests
+echo "Running tests..."
+npm test

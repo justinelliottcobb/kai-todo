@@ -7,7 +7,11 @@ export interface NetworkStatus {
   type: string;
 }
 
-export function useNetworkStatus() {
+export interface UseNetworkStatusReturn extends NetworkStatus {
+  isOnline: boolean;
+}
+
+export function useNetworkStatus(): UseNetworkStatusReturn {
   const [networkStatus, setNetworkStatus] = useState<NetworkStatus>({
     isConnected: true,
     isInternetReachable: null,

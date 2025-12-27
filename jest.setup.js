@@ -1,4 +1,4 @@
-import '@testing-library/react-native/extend-expect';
+import '@testing-library/react-native/build/matchers/extend-expect';
 
 // Mock react-native-mmkv
 jest.mock('react-native-mmkv', () => ({
@@ -10,5 +10,11 @@ jest.mock('react-native-mmkv', () => ({
   })),
 }));
 
-// Silence the warning: Animated: `useNativeDriver` is not supported
-jest.mock('react-native/Libraries/Animated/NativeAnimatedHelper');
+// Silence animation warnings in tests
+jest.mock('react-native', () => {
+  const rn = jest.requireActual('react-native');
+  rn.Animated.timing = () => ({
+    start: jest.fn(),
+  });
+  return rn;
+});

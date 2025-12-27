@@ -70,7 +70,7 @@ export default function SettingsScreen() {
                 Manual Sync
               </Text>
               <Text style={[styles.optionDescription, isDark ? styles.descDark : styles.descLight]}>
-                Sync only when you tap the "Sync Now" button
+                Sync only when you tap the &quot;Sync Now&quot; button
               </Text>
             </View>
             <View style={[styles.radio, !isAutoSync && styles.radioSelected]}>
