@@ -165,6 +165,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 6,
+    color: '#fff',
   },
   syncButtonLight: {
     backgroundColor: '#007aff',
