@@ -9,7 +9,7 @@ A cross-platform todo application built with Expo and React Native, featuring of
 - **Online Sync**: Synchronize todos with a REST API server when online
 - **Manual/Automatic Sync**: Choose between manual sync control or automatic background sync
 - **Server Status Polling**: Real-time server connectivity indicator
-- **Dark/Light Theme**: Automatic theme switching based on system preferences
+- **Dark/Light Theme**: System, light, or dark theme with manual toggle in settings
 - **Cross-Platform**: Runs on iOS, Android, and Web
 
 ## Tech Stack
@@ -176,6 +176,11 @@ npm run test:coverage
 
 Access settings via the gear icon in the tab bar:
 
+### Appearance
+- **System**: Follow device light/dark mode setting
+- **Light**: Always use light theme
+- **Dark**: Always use dark theme
+
 ### Server Status Polling
 - **Enabled**: Polls the server every 5 seconds to check connectivity
 - **Disabled**: Stops polling, shows offline status
@@ -200,33 +205,112 @@ Access settings via the gear icon in the tab bar:
 - Uses "last write wins" strategy based on `updatedAt` timestamp
 - Server and local todos are merged during sync
 
-## Building for Production
+## Building and Running Locally
 
-### Expo Build (EAS)
+This project uses Expo with prebuilt native projects, allowing you to build and run entirely locally without any Expo account.
 
-```bash
-# Install EAS CLI
-npm install -g eas-cli
+### Prerequisites
 
-# Configure EAS
-eas build:configure
+| Platform | Requirements |
+|----------|-------------|
+| **Web** | Node.js 20+, npm |
+| **Android** | Android Studio, Android SDK (API 34), JDK 17 |
+| **iOS** | macOS, Xcode 15+, CocoaPods |
 
-# Build for iOS
-eas build --platform ios
-
-# Build for Android
-eas build --platform android
-```
-
-### Local Development Build
+### Web (Easiest)
 
 ```bash
-# iOS (requires macOS with Xcode)
-npm run ios
+# Development
+npm start
+# Press 'w' to open in browser
 
-# Android
-npm run android
+# Production build
+npx expo export --platform web
+# Output in dist/ folder
 ```
+
+### Android
+
+**Option 1: Using Expo CLI**
+```bash
+# Builds and runs on connected device/emulator
+npx expo run:android
+```
+
+**Option 2: Using Android Studio**
+1. Open Android Studio
+2. Select "Open" → navigate to `kai-todo/android`
+3. Wait for Gradle sync to complete
+4. Select your device/emulator from the dropdown
+5. Click the Run button (green play icon)
+
+**Emulator Setup:**
+1. In Android Studio: Tools → Device Manager
+2. Create a new virtual device (e.g., Pixel 7, API 34)
+3. Start the emulator before running the app
+
+### iOS (macOS only)
+
+**Option 1: Using Expo CLI**
+```bash
+# Install CocoaPods dependencies first
+cd ios && pod install && cd ..
+
+# Builds and runs on simulator
+npx expo run:ios
+```
+
+**Option 2: Using Xcode**
+1. Open `ios/kaitodo.xcworkspace` in Xcode
+2. Select a simulator from the device dropdown
+3. Click the Run button
+
+### Verifying Your Environment
+
+```bash
+# Check for any setup issues
+npx expo doctor
+```
+
+## Deployment
+
+### Web (Netlify)
+
+The project includes a `netlify.toml` configuration for automatic deployment:
+
+1. Push to GitHub
+2. Connect your repo to Netlify
+3. Netlify auto-detects settings and deploys
+
+Or deploy manually:
+```bash
+npx expo export --platform web
+# Upload dist/ folder to any static host
+```
+
+### Mobile App Stores
+
+For production mobile builds, you can either:
+
+1. **Use EAS Build** (requires free Expo account):
+   ```bash
+   npm install -g eas-cli
+   eas build --platform android
+   eas build --platform ios
+   ```
+
+2. **Build locally** and submit manually:
+   - Android: Generate signed APK/AAB via Android Studio
+   - iOS: Archive and upload via Xcode
+
+## CI/CD
+
+The project includes a GitHub Actions workflow (`.github/workflows/ci.yml`) that runs on all PRs:
+
+- Linting (`npm run lint`)
+- Type checking (`npx tsc --noEmit`)
+- Tests (`npm test`)
+- Web build verification
 
 ## License
 
