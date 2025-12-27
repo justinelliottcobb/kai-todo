@@ -7,62 +7,87 @@ import {
   StyleSheet,
   useColorScheme,
   Keyboard,
+  Alert,
+  Platform,
 } from 'react-native';
+import { TodoValidationError } from '@/hooks/use-todos';
 
 interface AddTodoProps {
-  onAdd: (text: string) => void;
+  onAdd: (text: string) => TodoValidationError | null;
 }
 
 export function AddTodo({ onAdd }: AddTodoProps) {
   const [text, setText] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
 
   const handleAdd = () => {
-    const trimmedText = text.trim();
-    if (trimmedText) {
-      onAdd(trimmedText);
-      setText('');
-      Keyboard.dismiss();
+    setError(null);
+    const validationError = onAdd(text);
+
+    if (validationError) {
+      if (Platform.OS === 'web') {
+        setError(validationError.message);
+      } else {
+        Alert.alert('Invalid Todo', validationError.message);
+      }
+      return;
     }
+
+    setText('');
+    Keyboard.dismiss();
+  };
+
+  const handleTextChange = (newText: string) => {
+    setText(newText);
+    if (error) setError(null);
   };
 
   return (
-    <View style={styles.container}>
-      <TextInput
-        style={[
-          styles.input,
-          isDark ? styles.inputDark : styles.inputLight,
-        ]}
-        placeholder="Add a new todo..."
-        placeholderTextColor={isDark ? '#999' : '#666'}
-        value={text}
-        onChangeText={setText}
-        onSubmitEditing={handleAdd}
-        returnKeyType="done"
-        accessibilityLabel="New todo input"
-      />
-      <TouchableOpacity
-        style={[
-          styles.button,
-          !text.trim() && styles.buttonDisabled,
-        ]}
-        onPress={handleAdd}
-        disabled={!text.trim()}
-        accessibilityRole="button"
-        accessibilityLabel="Add todo"
-      >
-        <Text style={styles.buttonText}>Add</Text>
-      </TouchableOpacity>
+    <View style={styles.wrapper}>
+      <View style={styles.container}>
+        <TextInput
+          style={[
+            styles.input,
+            isDark ? styles.inputDark : styles.inputLight,
+            error && styles.inputError,
+          ]}
+          placeholder="Add a new todo..."
+          placeholderTextColor={isDark ? '#999' : '#666'}
+          value={text}
+          onChangeText={handleTextChange}
+          onSubmitEditing={handleAdd}
+          returnKeyType="done"
+          accessibilityLabel="New todo input"
+        />
+        <TouchableOpacity
+          style={[
+            styles.button,
+            !text.trim() && styles.buttonDisabled,
+          ]}
+          onPress={handleAdd}
+          disabled={!text.trim()}
+          accessibilityRole="button"
+          accessibilityLabel="Add todo"
+        >
+          <Text style={styles.buttonText}>Add</Text>
+        </TouchableOpacity>
+      </View>
+      {error && Platform.OS === 'web' && (
+        <Text style={styles.errorText}>{error}</Text>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    marginBottom: 16,
+  },
   container: {
     flexDirection: 'row',
     gap: 12,
-    marginBottom: 16,
   },
   input: {
     flex: 1,
@@ -97,5 +122,14 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
+  },
+  inputError: {
+    borderColor: '#ff3b30',
+  },
+  errorText: {
+    color: '#ff3b30',
+    fontSize: 12,
+    marginTop: 4,
+    marginLeft: 4,
   },
 });

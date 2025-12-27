@@ -183,33 +183,29 @@ export default function HomeScreen() {
             </Text>
           </View>
         ) : Platform.OS === 'web' ? (
-          <>
-            {console.log('Rendering WEB FlatList with', todos.length, 'todos')}
-            <FlatList
-              data={todos}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => {
-                const index = todos.findIndex(t => t.id === item.id);
-                console.log('Rendering web item:', item.id, 'at index', index);
-                return (
-                  <TodoItem
-                    todo={item}
-                    onToggle={toggleTodo}
-                    onDelete={deleteTodo}
-                    onEdit={editTodo}
-                    showOrderButtons={true}
-                    canMoveUp={index > 0}
-                    canMoveDown={index < todos.length - 1}
-                    onMoveUp={() => moveItemUp(index)}
-                    onMoveDown={() => moveItemDown(index)}
-                  />
-                );
-              }}
-              showsVerticalScrollIndicator={false}
-              style={styles.listContainer}
-              contentContainerStyle={styles.listContent}
-            />
-          </>
+          <FlatList
+            data={todos}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => {
+              const index = todos.findIndex(t => t.id === item.id);
+              return (
+                <TodoItem
+                  todo={item}
+                  onToggle={toggleTodo}
+                  onDelete={deleteTodo}
+                  onEdit={editTodo}
+                  showOrderButtons={true}
+                  canMoveUp={index > 0}
+                  canMoveDown={index < todos.length - 1}
+                  onMoveUp={() => moveItemUp(index)}
+                  onMoveDown={() => moveItemDown(index)}
+                />
+              );
+            }}
+            showsVerticalScrollIndicator={false}
+            style={styles.listContainer}
+            contentContainerStyle={styles.listContent}
+          />
         ) : (
           <DraggableFlatList
             data={todos}

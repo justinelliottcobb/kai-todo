@@ -7,14 +7,17 @@ import {
   TextInput,
   StyleSheet,
   useColorScheme,
+  Alert,
+  Platform,
 } from 'react-native';
 import { Todo } from '@/types/todo';
+import { TodoValidationError } from '@/hooks/use-todos';
 
 interface TodoItemProps {
   todo: Todo;
   onToggle: (id: string) => void;
   onDelete: (id: string) => void;
-  onEdit: (id: string, newText: string) => void;
+  onEdit: (id: string, newText: string) => TodoValidationError | null;
   onDrag?: () => void;
   isActive?: boolean;
   // Web-specific props for reordering
@@ -40,22 +43,40 @@ export function TodoItem({
 }: TodoItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(todo.text);
+  const [editError, setEditError] = useState<string | null>(null);
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
 
   const handleSaveEdit = () => {
-    const trimmedText = editText.trim();
-    if (trimmedText && trimmedText !== todo.text) {
-      onEdit(todo.id, trimmedText);
-    } else {
-      setEditText(todo.text);
+    if (editText.trim() === todo.text) {
+      setIsEditing(false);
+      return;
     }
+
+    const validationError = onEdit(todo.id, editText);
+
+    if (validationError) {
+      if (Platform.OS === 'web') {
+        setEditError(validationError.message);
+      } else {
+        Alert.alert('Invalid Todo', validationError.message);
+      }
+      return;
+    }
+
+    setEditError(null);
     setIsEditing(false);
   };
 
   const handleCancelEdit = () => {
     setEditText(todo.text);
+    setEditError(null);
     setIsEditing(false);
+  };
+
+  const handleEditTextChange = (text: string) => {
+    setEditText(text);
+    if (editError) setEditError(null);
   };
 
   return (
@@ -113,14 +134,15 @@ export function TodoItem({
       </TouchableOpacity>
 
       {isEditing ? (
-        <>
+        <View style={styles.editContainer}>
           <TextInput
             style={[
               styles.input,
               isDark ? styles.inputDark : styles.inputLight,
+              editError && styles.inputError,
             ]}
             value={editText}
-            onChangeText={setEditText}
+            onChangeText={handleEditTextChange}
             onSubmitEditing={handleSaveEdit}
             onBlur={handleSaveEdit}
             autoFocus
@@ -134,7 +156,10 @@ export function TodoItem({
           >
             <Text style={styles.actionText}>✕</Text>
           </TouchableOpacity>
-        </>
+          {editError && Platform.OS === 'web' && (
+            <Text style={styles.errorText}>{editError}</Text>
+          )}
+        </View>
       ) : (
         <>
           <Text
@@ -273,5 +298,20 @@ const styles = StyleSheet.create({
   },
   actionText: {
     fontSize: 20,
+  },
+  editContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  inputError: {
+    borderColor: '#ff3b30',
+  },
+  errorText: {
+    color: '#ff3b30',
+    fontSize: 12,
+    width: '100%',
   },
 });

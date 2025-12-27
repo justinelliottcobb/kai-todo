@@ -7,6 +7,8 @@ describe('AddTodo', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // By default, mock returns null (success)
+    mockOnAdd.mockReturnValue(null);
   });
 
   it('renders input and button', () => {
@@ -18,7 +20,7 @@ describe('AddTodo', () => {
     expect(getByText('Add')).toBeTruthy();
   });
 
-  it('calls onAdd with trimmed text when button is pressed', () => {
+  it('calls onAdd with text when button is pressed', () => {
     const { getByPlaceholderText, getByText } = render(
       <AddTodo onAdd={mockOnAdd} />
     );
@@ -26,13 +28,13 @@ describe('AddTodo', () => {
     const input = getByPlaceholderText('Add a new todo...');
     const button = getByText('Add');
 
-    fireEvent.changeText(input, '  New Todo  ');
+    fireEvent.changeText(input, 'New Todo');
     fireEvent.press(button);
 
     expect(mockOnAdd).toHaveBeenCalledWith('New Todo');
   });
 
-  it('clears input after adding todo', () => {
+  it('clears input after adding todo successfully', () => {
     const { getByPlaceholderText, getByText } = render(
       <AddTodo onAdd={mockOnAdd} />
     );
@@ -46,7 +48,24 @@ describe('AddTodo', () => {
     expect(input.props.value).toBe('');
   });
 
-  it('does not call onAdd with empty text', () => {
+  it('does not clear input when validation fails', () => {
+    mockOnAdd.mockReturnValue({ type: 'empty', message: 'Todo text cannot be empty' });
+
+    const { getByPlaceholderText, getByText } = render(
+      <AddTodo onAdd={mockOnAdd} />
+    );
+
+    const input = getByPlaceholderText('Add a new todo...');
+    const button = getByText('Add');
+
+    fireEvent.changeText(input, 'Test');
+    fireEvent.press(button);
+
+    // Input should retain its value when validation fails
+    expect(input.props.value).toBe('Test');
+  });
+
+  it('does not call onAdd with empty text (button disabled)', () => {
     const { getByPlaceholderText, getByText } = render(
       <AddTodo onAdd={mockOnAdd} />
     );
@@ -57,6 +76,7 @@ describe('AddTodo', () => {
     fireEvent.changeText(input, '   ');
     fireEvent.press(button);
 
+    // Button is disabled when text is empty/whitespace
     expect(mockOnAdd).not.toHaveBeenCalled();
   });
 

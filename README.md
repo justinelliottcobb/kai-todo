@@ -42,7 +42,10 @@ kai-todo/
 │   ├── server-status-indicator.tsx
 │   └── ui/                  # UI primitives
 ├── hooks/                   # Custom React hooks
-│   ├── use-todos.ts         # Todo state management
+│   ├── use-todos.ts         # Main composable hook (combines below)
+│   ├── use-todo-storage.ts  # MMKV persistence layer
+│   ├── use-todo-sync.ts     # Server synchronization
+│   ├── use-todo-actions.ts  # CRUD operations with validation
 │   ├── use-network-status.ts # Network connectivity
 │   └── use-server-status.ts # Server polling
 ├── services/                # API and sync services
@@ -54,7 +57,8 @@ kai-todo/
 │   ├── todo.ts              # Todo interface
 │   └── settings.ts          # Settings interface
 ├── utils/                   # Utilities
-│   └── storage.ts           # MMKV storage setup
+│   ├── storage.ts           # MMKV storage setup
+│   └── uuid.ts              # UUID generation utility
 ├── constants/               # App constants
 │   ├── api.ts               # API configuration
 │   └── theme.ts             # Theme colors
@@ -62,6 +66,27 @@ kai-todo/
 │   └── db.json              # json-server database
 └── __tests__/               # Test files
 ```
+
+## Hook Architecture
+
+The todo management logic is decomposed into small, focused hooks for maintainability and testability:
+
+```
+useTodos() ─────┬─── useTodoStorage()   # MMKV read/write
+                │
+                ├─── useTodoActions()   # CRUD + input validation
+                │
+                └─── useTodoSync()      # Server synchronization
+```
+
+| Hook | Responsibility |
+|------|----------------|
+| `useTodos` | Main entry point, composes other hooks, provides derived state |
+| `useTodoStorage` | Loads/saves todos to MMKV, tracks loading state |
+| `useTodoActions` | Add, edit, delete, toggle, reorder with validation |
+| `useTodoSync` | Syncs with server, handles offline/online transitions |
+| `useNetworkStatus` | Monitors device network connectivity |
+| `useServerStatus` | Polls server health endpoint |
 
 ## Getting Started
 
