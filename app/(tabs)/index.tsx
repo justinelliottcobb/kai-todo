@@ -1,89 +1,180 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
   FlatList,
+  Platform,
   StyleSheet,
   useColorScheme,
   SafeAreaView,
   StatusBar,
 } from 'react-native';
-import { Todo } from '@/types/todo';
-import { storage, STORAGE_KEYS } from '@/utils/storage';
+import DraggableFlatList, {
+  RenderItemParams,
+} from 'react-native-draggable-flatlist';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { TodoItem } from '@/components/todo-item';
 import { AddTodo } from '@/components/add-todo';
+import { SyncStatus } from '@/components/sync-status';
+import { ServerStatusIndicator } from '@/components/server-status-indicator';
+import { SyncNotification } from '@/components/sync-notification';
+import { useTodos } from '@/hooks/use-todos';
+import { useServerStatus } from '@/hooks/use-server-status';
+import { useSettings } from '@/contexts/settings-context';
+import { Todo } from '@/types/todo';
 
 export default function HomeScreen() {
-  const [todos, setTodos] = useState<Todo[]>([]);
+  const {
+    todos,
+    activeTodos,
+    completedTodos,
+    addTodo,
+    toggleTodo,
+    deleteTodo,
+    editTodo,
+    reorderTodos,
+    syncStatus,
+    lastSyncTime,
+    syncError,
+    pendingChanges,
+    isOnline,
+    performSync,
+  } = useTodos();
+  const { settings } = useSettings();
+  const { isServerOnline, isChecking, refresh: refreshServerStatus } = useServerStatus({
+    enabled: settings.enableServerPolling,
+  });
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
 
-  // Load todos from storage on mount
-  useEffect(() => {
-    const loadTodos = () => {
-      try {
-        const storedTodos = storage.getString(STORAGE_KEYS.TODOS);
-        if (storedTodos) {
-          setTodos(JSON.parse(storedTodos));
-        }
-      } catch (error) {
-        console.error('Failed to load todos:', error);
-      }
-    };
-    loadTodos();
-  }, []);
+  // Sync notification state
+  const [showSyncNotification, setShowSyncNotification] = useState(false);
+  const [syncNotificationMessage, setSyncNotificationMessage] = useState('');
+  const [syncNotificationType, setSyncNotificationType] = useState<'success' | 'error'>('success');
 
-  // Save todos to storage whenever they change
+  // Track previous sync status for auto-sync notification
+  const prevSyncStatusRef = useRef(syncStatus);
+  const prevPendingChangesRef = useRef(pendingChanges);
+
+  // Auto-sync when in automatic mode and there are pending changes
   useEffect(() => {
-    try {
-      storage.set(STORAGE_KEYS.TODOS, JSON.stringify(todos));
-    } catch (error) {
-      console.error('Failed to save todos:', error);
+    if (
+      settings.syncMode === 'automatic' &&
+      isOnline &&
+      isServerOnline &&
+      pendingChanges > 0 &&
+      syncStatus === 'idle'
+    ) {
+      performSync();
     }
-  }, [todos]);
+  }, [settings.syncMode, isOnline, isServerOnline, pendingChanges, syncStatus, performSync]);
 
-  const addTodo = useCallback((text: string) => {
-    const newTodo: Todo = {
-      id: Date.now().toString(),
-      text,
-      completed: false,
-      createdAt: Date.now(),
-    };
-    setTodos((prevTodos) => [newTodo, ...prevTodos]);
-  }, []);
+  // Show notification when sync completes in automatic mode
+  useEffect(() => {
+    if (settings.syncMode === 'automatic') {
+      // Sync just completed successfully
+      if (
+        prevSyncStatusRef.current === 'syncing' &&
+        syncStatus === 'idle' &&
+        prevPendingChangesRef.current > 0
+      ) {
+        setSyncNotificationMessage('Synced with server');
+        setSyncNotificationType('success');
+        setShowSyncNotification(true);
+      }
+      // Sync failed
+      if (prevSyncStatusRef.current === 'syncing' && syncStatus === 'error') {
+        setSyncNotificationMessage('Sync failed');
+        setSyncNotificationType('error');
+        setShowSyncNotification(true);
+      }
+    }
+    prevSyncStatusRef.current = syncStatus;
+    prevPendingChangesRef.current = pendingChanges;
+  }, [syncStatus, settings.syncMode, pendingChanges]);
 
-  const toggleTodo = useCallback((id: string) => {
-    setTodos((prevTodos) =>
-      prevTodos.map((todo) =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      )
+  const moveItemUp = (index: number) => {
+    if (index === 0) return;
+    const newTodos = [...todos];
+    [newTodos[index - 1], newTodos[index]] = [newTodos[index], newTodos[index - 1]];
+    reorderTodos(newTodos);
+  };
+
+  const moveItemDown = (index: number) => {
+    if (index === todos.length - 1) return;
+    const newTodos = [...todos];
+    [newTodos[index], newTodos[index + 1]] = [newTodos[index + 1], newTodos[index]];
+    reorderTodos(newTodos);
+  };
+  const renderItem = ({ item, drag, isActive }: RenderItemParams<Todo>) => {
+    const index = todos.findIndex(t => t.id === item.id);
+    return (
+      <TodoItem
+        todo={item}
+        onToggle={toggleTodo}
+        onDelete={deleteTodo}
+        onEdit={editTodo}
+        onDrag={drag}
+        isActive={isActive}
+        // Web-specific props
+        showOrderButtons={Platform.OS === 'web'}
+        canMoveUp={index > 0}
+        canMoveDown={index < todos.length - 1}
+        onMoveUp={() => moveItemUp(index)}
+        onMoveDown={() => moveItemDown(index)}
+      />
     );
-  }, []);
-
-  const deleteTodo = useCallback((id: string) => {
-    setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
-  }, []);
-
-  const activeTodos = todos.filter((todo) => !todo.completed);
-  const completedTodos = todos.filter((todo) => todo.completed);
+  };
 
   return (
-    <SafeAreaView
-      style={[styles.container, isDark ? styles.containerDark : styles.containerLight]}
-    >
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
-      
-      <View style={styles.header}>
-        <Text style={[styles.title, isDark ? styles.titleDark : styles.titleLight]}>
-          Kai Todo
-        </Text>
-        <Text style={[styles.stats, isDark ? styles.statsDark : styles.statsLight]}>
-          {activeTodos.length} active • {completedTodos.length} completed
-        </Text>
-      </View>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaView
+        style={[styles.container, isDark ? styles.containerDark : styles.containerLight]}
+      >
+        <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+        
+        <View style={styles.header}>
+          <View style={styles.headerRow}>
+            <Text style={[styles.title, isDark ? styles.titleDark : styles.titleLight]}>
+              Kai Todo
+            </Text>
+            <ServerStatusIndicator
+              isServerOnline={isServerOnline}
+              isChecking={isChecking}
+              onPress={refreshServerStatus}
+            />
+          </View>
+          <Text style={[styles.stats, isDark ? styles.statsDark : styles.statsLight]}>
+            {activeTodos.length} active • {completedTodos.length} completed
+          </Text>
+        </View>
 
-      <View style={styles.content}>
-        <AddTodo onAdd={addTodo} />
+        {/* Sync notification for automatic mode */}
+        {showSyncNotification && (
+          <SyncNotification
+            visible={showSyncNotification}
+            message={syncNotificationMessage}
+            type={syncNotificationType}
+            onHide={() => setShowSyncNotification(false)}
+          />
+        )}
+
+        <View style={styles.syncContainer}>
+          <SyncStatus
+            syncStatus={syncStatus}
+            lastSyncTime={lastSyncTime}
+            pendingChanges={pendingChanges}
+            syncError={syncError}
+            isOnline={isOnline}
+            isServerOnline={isServerOnline}
+            syncMode={settings.syncMode}
+            onSync={performSync}
+          />
+        </View>
+
+        <View style={styles.addTodoContainer}>
+          <AddTodo onAdd={addTodo} />
+        </View>
 
         {todos.length === 0 ? (
           <View style={styles.emptyContainer}>
@@ -91,23 +182,47 @@ export default function HomeScreen() {
               No todos yet! Add one to get started.
             </Text>
           </View>
+        ) : Platform.OS === 'web' ? (
+          <>
+            {console.log('Rendering WEB FlatList with', todos.length, 'todos')}
+            <FlatList
+              data={todos}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => {
+                const index = todos.findIndex(t => t.id === item.id);
+                console.log('Rendering web item:', item.id, 'at index', index);
+                return (
+                  <TodoItem
+                    todo={item}
+                    onToggle={toggleTodo}
+                    onDelete={deleteTodo}
+                    onEdit={editTodo}
+                    showOrderButtons={true}
+                    canMoveUp={index > 0}
+                    canMoveDown={index < todos.length - 1}
+                    onMoveUp={() => moveItemUp(index)}
+                    onMoveDown={() => moveItemDown(index)}
+                  />
+                );
+              }}
+              showsVerticalScrollIndicator={false}
+              style={styles.listContainer}
+              contentContainerStyle={styles.listContent}
+            />
+          </>
         ) : (
-          <FlatList
+          <DraggableFlatList
             data={todos}
             keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <TodoItem
-                todo={item}
-                onToggle={toggleTodo}
-                onDelete={deleteTodo}
-              />
-            )}
+            renderItem={renderItem}
+            onDragEnd={({ data }) => reorderTodos(data)}
             showsVerticalScrollIndicator={false}
+            containerStyle={styles.listContainer}
             contentContainerStyle={styles.listContent}
           />
         )}
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </GestureHandlerRootView>
   );
 }
 
@@ -125,6 +240,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 16,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
   },
   title: {
     fontSize: 32,
@@ -146,7 +267,15 @@ const styles = StyleSheet.create({
   statsDark: {
     color: '#999',
   },
-  content: {
+  syncContainer: {
+    paddingHorizontal: 20,
+    marginBottom: 8,
+  },
+  addTodoContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 8,
+  },
+  listContainer: {
     flex: 1,
     paddingHorizontal: 20,
   },

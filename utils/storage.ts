@@ -6,4 +6,7 @@ export const storage = new MMKV({
 
 export const STORAGE_KEYS = {
   TODOS: 'todos',
+  PENDING_DELETES: 'pending_deletes',
+  LAST_SYNC: 'last_sync',
+  SETTINGS: 'settings',
 } as const;
