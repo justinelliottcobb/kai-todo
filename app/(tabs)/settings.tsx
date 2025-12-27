@@ -6,10 +6,10 @@ import {
   StyleSheet,
   SafeAreaView,
   StatusBar,
-  useColorScheme,
   TouchableOpacity,
 } from 'react-native';
-import { useSettings } from '@/contexts/settings-context';
+import { useSettings, useColorScheme } from '@/contexts/settings-context';
+import { ThemePreference } from '@/types/settings';
 
 export default function SettingsScreen() {
   const colorScheme = useColorScheme();
@@ -17,6 +17,12 @@ export default function SettingsScreen() {
   const { settings, updateSettings } = useSettings();
 
   const isAutoSync = settings.syncMode === 'automatic';
+
+  const themeOptions: { value: ThemePreference; label: string; description: string }[] = [
+    { value: 'system', label: 'System', description: 'Follow system appearance' },
+    { value: 'light', label: 'Light', description: 'Always use light theme' },
+    { value: 'dark', label: 'Dark', description: 'Always use dark theme' },
+  ];
 
   return (
     <SafeAreaView
@@ -31,6 +37,40 @@ export default function SettingsScreen() {
       </View>
 
       <View style={styles.content}>
+        {/* Theme Selection */}
+        <View style={[styles.settingSection, isDark ? styles.sectionDark : styles.sectionLight]}>
+          <Text style={[styles.sectionTitle, isDark ? styles.textDark : styles.textLight]}>
+            Appearance
+          </Text>
+
+          {themeOptions.map((option, index) => (
+            <TouchableOpacity
+              key={option.value}
+              style={[
+                styles.optionRow,
+                isDark ? styles.optionRowDark : styles.optionRowLight,
+                index === 0 && styles.optionRowFirst,
+                settings.theme === option.value && styles.optionSelected,
+              ]}
+              onPress={() => updateSettings({ theme: option.value })}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: settings.theme === option.value }}
+            >
+              <View style={styles.optionInfo}>
+                <Text style={[styles.optionLabel, isDark ? styles.textDark : styles.textLight]}>
+                  {option.label}
+                </Text>
+                <Text style={[styles.optionDescription, isDark ? styles.descDark : styles.descLight]}>
+                  {option.description}
+                </Text>
+              </View>
+              <View style={[styles.radio, settings.theme === option.value && styles.radioSelected]}>
+                {settings.theme === option.value && <View style={styles.radioInner} />}
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
+
         {/* Server Polling Toggle */}
         <View style={[styles.settingRow, isDark ? styles.settingRowDark : styles.settingRowLight]}>
           <View style={styles.settingInfo}>
@@ -110,6 +150,7 @@ export default function SettingsScreen() {
               : 'You control when to sync. Pending changes will be shown on the main screen with a "Sync Now" button.'}
           </Text>
         </View>
+
       </View>
     </SafeAreaView>
   );
@@ -207,6 +248,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: 16,
     borderTopWidth: 1,
+  },
+  optionRowFirst: {
+    borderTopWidth: 0,
   },
   optionRowLight: {
     borderTopColor: '#e0e0e0',

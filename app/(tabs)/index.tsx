@@ -5,10 +5,10 @@ import {
   FlatList,
   Platform,
   StyleSheet,
-  useColorScheme,
   SafeAreaView,
   StatusBar,
 } from 'react-native';
+import { useColorScheme , useSettings } from '@/contexts/settings-context';
 import DraggableFlatList, {
   RenderItemParams,
 } from 'react-native-draggable-flatlist';
@@ -20,7 +20,6 @@ import { ServerStatusIndicator } from '@/components/server-status-indicator';
 import { SyncNotification } from '@/components/sync-notification';
 import { useTodos } from '@/hooks/use-todos';
 import { useServerStatus } from '@/hooks/use-server-status';
-import { useSettings } from '@/contexts/settings-context';
 import { Todo } from '@/types/todo';
 
 export default function HomeScreen() {

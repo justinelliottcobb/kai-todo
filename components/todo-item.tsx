@@ -6,10 +6,10 @@ import {
   Pressable,
   TextInput,
   StyleSheet,
-  useColorScheme,
   Alert,
   Platform,
 } from 'react-native';
+import { useColorScheme } from '@/contexts/settings-context';
 import { Todo } from '@/types/todo';
 import { TodoValidationError } from '@/hooks/use-todos';
 

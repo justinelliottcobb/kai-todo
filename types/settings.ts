@@ -1,4 +1,9 @@
+export type ThemePreference = 'light' | 'dark' | 'system';
+
 export interface AppSettings {
+  // Theme preference
+  theme: ThemePreference;
+
   // Server status polling
   enableServerPolling: boolean;
 
@@ -7,6 +12,7 @@ export interface AppSettings {
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
+  theme: 'system',
   enableServerPolling: true,
   syncMode: 'manual',
 };

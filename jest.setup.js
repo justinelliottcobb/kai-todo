@@ -7,6 +7,7 @@ jest.mock('react-native-mmkv', () => ({
     getString: jest.fn(),
     delete: jest.fn(),
     clearAll: jest.fn(),
+    addOnValueChangedListener: jest.fn(() => ({ remove: jest.fn() })),
   })),
 }));
 

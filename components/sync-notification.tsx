@@ -3,8 +3,8 @@ import {
   Text,
   StyleSheet,
   Animated,
-  useColorScheme,
 } from 'react-native';
+import { useColorScheme } from '@/contexts/settings-context';
 
 interface SyncNotificationProps {
   visible: boolean;

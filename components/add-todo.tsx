@@ -5,11 +5,11 @@ import {
   TouchableOpacity,
   Text,
   StyleSheet,
-  useColorScheme,
   Keyboard,
   Alert,
   Platform,
 } from 'react-native';
+import { useColorScheme } from '@/contexts/settings-context';
 import { TodoValidationError } from '@/hooks/use-todos';
 
 interface AddTodoProps {

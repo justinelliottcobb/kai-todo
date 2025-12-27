@@ -5,8 +5,8 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  useColorScheme,
 } from 'react-native';
+import { useColorScheme } from '@/contexts/settings-context';
 
 interface ServerStatusIndicatorProps {
   isServerOnline: boolean;
