@@ -2,7 +2,7 @@
 
 This document captures notable implementation challenges encountered during development, particularly those related to Expo and React Native's cross-platform compilation.
 
-## Theme Toggle Implementation (December 2024)
+## Theme Toggle Implementation (December 2025)
 
 ### Problem Statement
 
