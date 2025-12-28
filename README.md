@@ -231,41 +231,57 @@ npx expo export --platform web
 
 ### Android
 
-**Option 1: Using Expo CLI**
-```bash
-# Builds and runs on connected device/emulator
-npx expo run:android
-```
-
-**Option 2: Using Android Studio**
+**Option 1: Using Android Studio (Recommended)**
 1. Open Android Studio
 2. Select "Open" → navigate to `kai-todo/android`
 3. Wait for Gradle sync to complete
 4. Select your device/emulator from the dropdown
 5. Click the Run button (green play icon)
 
-**Option 3: Building and Installing Manually**
-1. `cd /kai-todo/android`
-2. `./gradlew.bat/assembleDebug`
-3. `cd /kai-todo/android/app/build/outputs/apk/debug`
-4. Run desired emulator in Android Studio
-5. `adb install app-debug/apk`
-6. In `kai-todo` root: `npm run start`
+**Option 2: Command Line (Gradle)**
+```bash
+# Navigate to android directory
+cd android
+
+# Build debug APK (use gradlew.bat on Windows, ./gradlew on Linux/macOS)
+./gradlew assembleDebug
+
+# APK location: android/app/build/outputs/apk/debug/app-debug.apk
+
+# Install on connected device/emulator (requires adb in PATH)
+adb install app/build/outputs/apk/debug/app-debug.apk
+```
+
+**Option 3: Using Expo CLI**
+```bash
+# Builds and runs on connected device/emulator
+npx expo run:android
+```
 
 **Emulator Setup:**
 1. In Android Studio: Tools → Device Manager
 2. Create a new virtual device (e.g., Pixel 7, API 34)
 3. Start the emulator before running the app
 
-**To speed up Windows builds:**
+**Running with Metro Bundler:**
+
+After installing the APK, start the Metro bundler to serve the JavaScript bundle:
+```bash
+npm start
 ```
-# Add Windows Defender exclusions (run as Admin)
+The app will connect to Metro automatically when launched.
+
+**To speed up Windows builds:**
+```powershell
+# Add Windows Defender exclusions (run PowerShell as Admin)
 Add-MpPreference -ExclusionPath "C:\path\to\kai-todo"
 Add-MpPreference -ExclusionPath "$env:USERPROFILE\.gradle"
 Add-MpPreference -ExclusionProcess "java.exe"
 Add-MpPreference -ExclusionProcess "node.exe"
+```
 
-# For Gradle specifically, add to android/gradle.properties:
+Add to `android/gradle.properties` for faster Gradle builds:
+```properties
 org.gradle.daemon=true
 org.gradle.caching=true
 org.gradle.configureondemand=true
