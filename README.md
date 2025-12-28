@@ -138,11 +138,15 @@ The server runs at `http://localhost:3001` with the following endpoints:
 - `PUT /todos/:id` - Update a todo
 - `DELETE /todos/:id` - Delete a todo
 
-### Platform-Specific API URLs
+### API URL Configuration
 
-The app automatically uses the correct URL based on platform:
-- **iOS Simulator / Web**: `http://localhost:3001`
-- **Android Emulator**: `http://10.0.2.2:3001`
+The app uses `http://localhost:3001` for all platforms. For Android (emulator or physical device), you need to set up ADB port forwarding so that `localhost` on the device routes to your development machine:
+
+```bash
+adb reverse tcp:3001 tcp:3001
+```
+
+This command forwards port 3001 from the Android device to your machine where json-server is running.
 
 ## Testing
 
@@ -308,6 +312,74 @@ resizable.config.id = -1
 posture = 0
 uuid = 1766883837549
 ```
+
+### Physical Android Device
+
+Testing on a physical Android device requires a few additional steps.
+
+**Prerequisites:**
+- USB debugging enabled on your device (Settings → Developer Options → USB Debugging)
+- Device connected via USB and authorized for debugging
+- ADB installed and in your PATH
+
+**1. Verify device connection:**
+```bash
+adb devices
+# Should show your device listed
+```
+
+**2. Clean build (required for New Architecture):**
+
+This app uses `react-native-mmkv` v3 which requires React Native's New Architecture (TurboModules). If you encounter errors like "Failed to create a new MMKV instance", perform a clean rebuild:
+
+```bash
+# Remove node_modules and reinstall
+rm -rf node_modules
+npm install
+
+# Remove android folder and regenerate with New Architecture enabled
+rm -rf android
+npx expo prebuild --platform android
+
+# Clean Gradle cache
+cd android
+./gradlew clean
+cd ..
+
+# Uninstall the app from your physical device before reinstalling
+```
+
+**3. Build and install:**
+```bash
+npm run android
+```
+
+**4. Start Metro bundler (if not already running):**
+```bash
+npm start
+```
+
+**5. Set up port forwarding for API server:**
+```bash
+# Forward port 3001 from device to your machine
+adb reverse tcp:3001 tcp:3001
+
+# Start the API server
+npm run server
+```
+
+**6. Verify port forwarding:**
+```bash
+adb reverse --list
+# Should show: (reverse) tcp:3001 tcp:3001
+```
+
+The app should now connect to your local json-server and show "Online" status.
+
+**Troubleshooting:**
+- If the server shows "Offline", verify `adb reverse` is set and the server is running
+- If you see MMKV errors, ensure you did the clean prebuild steps above
+- The "keep awake" error in Metro logs is harmless and only affects dev screen timeout
 
 ### iOS (macOS only)
 
