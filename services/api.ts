@@ -121,6 +121,9 @@ export const todoApi = {
       }
     }
 
+    // Sort by order (user-defined), then by createdAt as fallback
+    results.sort((a, b) => a.order - b.order || a.createdAt - b.createdAt);
+
     return results;
   },
 };
