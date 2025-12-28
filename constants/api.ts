@@ -1,13 +1,7 @@
-import { Platform } from 'react-native';
-
-// Android emulator uses 10.0.2.2 to access host machine's localhost
-// iOS simulator and web use localhost directly
-const getBaseUrl = () => {
-  if (Platform.OS === 'android') {
-    return 'http://10.0.2.2:3001';
-  }
-  return 'http://localhost:3001';
-};
-
-export const API_BASE_URL = getBaseUrl();
+// Using localhost works for:
+// - Web: direct access
+// - iOS Simulator: direct access
+// - Android Emulator: requires `adb reverse tcp:3001 tcp:3001`
+// - Physical devices: requires `adb reverse tcp:3001 tcp:3001`
+export const API_BASE_URL = 'http://localhost:3001';
 export const API_TIMEOUT = 10000;
