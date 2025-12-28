@@ -4,19 +4,16 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  ActivityIndicator,
 } from 'react-native';
 import { useColorScheme } from '@/contexts/settings-context';
 
 interface ServerStatusIndicatorProps {
   isServerOnline: boolean;
-  isChecking: boolean;
   onPress?: () => void;
 }
 
 export function ServerStatusIndicator({
   isServerOnline,
-  isChecking,
   onPress,
 }: ServerStatusIndicatorProps) {
   const colorScheme = useColorScheme();
@@ -32,13 +29,9 @@ export function ServerStatusIndicator({
       accessibilityLabel={`Server status: ${statusText}. Tap to refresh.`}
       accessibilityRole="button"
     >
-      {isChecking ? (
-        <ActivityIndicator size="small" color={isDark ? '#fff' : '#666'} />
-      ) : (
-        <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
-      )}
+      <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
       <Text style={[styles.statusText, isDark ? styles.textDark : styles.textLight]}>
-        {isChecking ? 'Checking...' : statusText}
+        {statusText}
       </Text>
     </TouchableOpacity>
   );

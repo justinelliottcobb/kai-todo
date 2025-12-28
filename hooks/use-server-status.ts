@@ -1,17 +1,18 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { checkServerHealth } from '@/services/api';
+import { useNetworkStatus } from './use-network-status';
 
-const POLL_INTERVAL = 5000; // Poll every 5 seconds
+const POLL_INTERVAL = 15000; // Poll every 15 seconds
 
 export interface ServerStatus {
   isServerOnline: boolean;
-  isChecking: boolean;
   lastChecked: number | null;
 }
 
 export interface UseServerStatusReturn extends ServerStatus {
   refresh: () => Promise<boolean>;
   isPollingEnabled: boolean;
+  isDeviceOnline: boolean;
 }
 
 interface UseServerStatusOptions {
@@ -20,19 +21,30 @@ interface UseServerStatusOptions {
 
 export function useServerStatus(options: UseServerStatusOptions = {}): UseServerStatusReturn {
   const { enabled = true } = options;
+  const { isOnline: isDeviceOnline } = useNetworkStatus();
   const [isServerOnline, setIsServerOnline] = useState<boolean>(false);
-  const [isChecking, setIsChecking] = useState<boolean>(enabled);
   const [lastChecked, setLastChecked] = useState<number | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const checkStatus = useCallback(async () => {
-    setIsChecking(true);
+    // Don't attempt to check server if device is offline
+    if (!isDeviceOnline) {
+      setIsServerOnline(false);
+      return false;
+    }
+
     const online = await checkServerHealth();
     setIsServerOnline(online);
     setLastChecked(Date.now());
-    setIsChecking(false);
     return online;
-  }, []);
+  }, [isDeviceOnline]);
+
+  // When device goes offline, immediately mark server as offline
+  useEffect(() => {
+    if (!isDeviceOnline) {
+      setIsServerOnline(false);
+    }
+  }, [isDeviceOnline]);
 
   // Initial check and polling
   useEffect(() => {
@@ -42,14 +54,13 @@ export function useServerStatus(options: UseServerStatusOptions = {}): UseServer
       intervalRef.current = null;
     }
 
-    if (!enabled) {
-      // When polling is disabled, assume offline (or could default to online)
+    if (!enabled || !isDeviceOnline) {
+      // When polling is disabled or device is offline, mark server as offline
       setIsServerOnline(false);
-      setIsChecking(false);
       return;
     }
 
-    // Check immediately on mount
+    // Check immediately on mount or when device comes online
     checkStatus();
 
     // Set up polling interval
@@ -62,19 +73,19 @@ export function useServerStatus(options: UseServerStatusOptions = {}): UseServer
         clearInterval(intervalRef.current);
       }
     };
-  }, [checkStatus, enabled]);
+  }, [checkStatus, enabled, isDeviceOnline]);
 
   // Manual refresh function
   const refresh = useCallback(async () => {
-    if (!enabled) return false;
+    if (!enabled || !isDeviceOnline) return false;
     return checkStatus();
-  }, [checkStatus, enabled]);
+  }, [checkStatus, enabled, isDeviceOnline]);
 
   return {
     isServerOnline,
-    isChecking,
     lastChecked,
     refresh,
     isPollingEnabled: enabled,
+    isDeviceOnline,
   };
 }

@@ -40,7 +40,7 @@ export default function HomeScreen() {
     performSync,
   } = useTodos();
   const { settings } = useSettings();
-  const { isServerOnline, isChecking, refresh: refreshServerStatus } = useServerStatus({
+  const { isServerOnline, refresh: refreshServerStatus } = useServerStatus({
     enabled: settings.enableServerPolling,
   });
   const colorScheme = useColorScheme();
@@ -139,7 +139,6 @@ export default function HomeScreen() {
             </Text>
             <ServerStatusIndicator
               isServerOnline={isServerOnline}
-              isChecking={isChecking}
               onPress={refreshServerStatus}
             />
           </View>
