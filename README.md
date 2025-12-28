@@ -231,23 +231,45 @@ npx expo export --platform web
 
 ### Android
 
-**Option 1: Using Expo CLI**
-```bash
-# Builds and runs on connected device/emulator
-npx expo run:android
-```
-
-**Option 2: Using Android Studio**
+**Option 1: Using Android Studio (Recommended)**
 1. Open Android Studio
 2. Select "Open" → navigate to `kai-todo/android`
 3. Wait for Gradle sync to complete
 4. Select your device/emulator from the dropdown
 5. Click the Run button (green play icon)
 
+**Option 2: Command Line (Gradle)**
+```bash
+# Navigate to android directory
+cd android
+
+# Build debug APK
+./gradlew assembleDebug
+
+# APK location: android/app/build/outputs/apk/debug/app-debug.apk
+
+# Install on connected device/emulator (requires adb in PATH)
+adb install app/build/outputs/apk/debug/app-debug.apk
+```
+
+**Option 3: Using Expo CLI**
+```bash
+# Builds and runs on connected device/emulator
+npx expo run:android
+```
+
 **Emulator Setup:**
 1. In Android Studio: Tools → Device Manager
 2. Create a new virtual device (e.g., Pixel 7, API 34)
 3. Start the emulator before running the app
+
+**Running with Metro Bundler:**
+
+After installing the APK, start the Metro bundler to serve the JavaScript bundle:
+```bash
+npm start
+```
+The app will connect to Metro automatically when launched.
 
 ### iOS (macOS only)
 
