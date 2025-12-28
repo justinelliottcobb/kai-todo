@@ -41,3 +41,6 @@ app-example
 # generated native folders
 /ios
 /android
+
+# json-server database (generated at runtime)
+server/db.json

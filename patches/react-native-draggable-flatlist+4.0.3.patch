@@ -1,0 +1,28 @@
+diff --git a/node_modules/react-native-draggable-flatlist/src/components/CellRendererComponent.tsx b/node_modules/react-native-draggable-flatlist/src/components/CellRendererComponent.tsx
+index e4e861a..0563935 100644
+--- a/node_modules/react-native-draggable-flatlist/src/components/CellRendererComponent.tsx
++++ b/node_modules/react-native-draggable-flatlist/src/components/CellRendererComponent.tsx
+@@ -162,8 +162,7 @@ function CellRendererComponent<T>(props: Props<T>) {
+           ? itemLayoutAnimation
+           : undefined
+       }
+-      style={[props.style, baseStyle, animStyle]}
+-      pointerEvents={activeKey ? "none" : "auto"}
++      style={[props.style, baseStyle, animStyle, { pointerEvents: activeKey ? "none" : "auto" }]}
+     >
+       <CellProvider isActive={isActive}>{children}</CellProvider>
+     </Animated.View>
+diff --git a/node_modules/react-native-draggable-flatlist/src/components/PlaceholderItem.tsx b/node_modules/react-native-draggable-flatlist/src/components/PlaceholderItem.tsx
+index 5e6319f..46efaf2 100644
+--- a/node_modules/react-native-draggable-flatlist/src/components/PlaceholderItem.tsx
++++ b/node_modules/react-native-draggable-flatlist/src/components/PlaceholderItem.tsx
+@@ -65,8 +65,7 @@ function PlaceholderItem<T>({ renderPlaceholder }: Props<T>) {
+ 
+   return (
+     <Animated.View
+-      pointerEvents={activeKey ? "auto" : "none"}
+-      style={[StyleSheet.absoluteFill, animStyle, extraStyle]}
++      style={[StyleSheet.absoluteFill, animStyle, extraStyle, { pointerEvents: activeKey ? "auto" : "none" }]}
+     >
+       {!activeItem || activeIndex === undefined
+         ? null

@@ -28,6 +28,24 @@ interface TodoItemProps {
   onMoveDown?: () => void;
 }
 
+const relativeTimeFormatter = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' });
+
+function formatTimestamp(timestamp: number): string {
+  const now = Date.now();
+  const diffMs = now - timestamp;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMins < 1) return relativeTimeFormatter.format(0, 'minute'); // "now" or equivalent
+  if (diffMins < 60) return relativeTimeFormatter.format(-diffMins, 'minute');
+  if (diffHours < 24) return relativeTimeFormatter.format(-diffHours, 'hour');
+  if (diffDays < 7) return relativeTimeFormatter.format(-diffDays, 'day');
+
+  const date = new Date(timestamp);
+  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
 export function TodoItem({
   todo,
   onToggle,
@@ -46,6 +64,10 @@ export function TodoItem({
   const [editError, setEditError] = useState<string | null>(null);
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
+
+  const wasUpdated = todo.updatedAt && todo.updatedAt !== todo.createdAt;
+  const displayTimestamp = wasUpdated ? todo.updatedAt : todo.createdAt;
+  const timestampLabel = wasUpdated ? 'Updated' : 'Created';
 
   const handleSaveEdit = () => {
     if (editText.trim() === todo.text) {
@@ -162,15 +184,20 @@ export function TodoItem({
         </View>
       ) : (
         <>
-          <Text
-            style={[
-              styles.text,
-              todo.completed && styles.textCompleted,
-              isDark ? styles.textDark : styles.textLight,
-            ]}
-          >
-            {todo.text}
-          </Text>
+          <View style={styles.textContainer}>
+            <Text
+              style={[
+                styles.text,
+                todo.completed && styles.textCompleted,
+                isDark ? styles.textDark : styles.textLight,
+              ]}
+            >
+              {todo.text}
+            </Text>
+            <Text style={[styles.timestamp, isDark ? styles.timestampDark : styles.timestampLight]}>
+              {timestampLabel} {formatTimestamp(displayTimestamp)}
+            </Text>
+          </View>
 
           <TouchableOpacity
             style={styles.actionButton}
@@ -212,11 +239,20 @@ const styles = StyleSheet.create({
   },
   containerActive: {
     opacity: 0.8,
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 8,
+      },
+      web: {
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
+      },
+    }),
   },
   dragHandle: {
     padding: 4,
@@ -261,8 +297,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  text: {
+  textContainer: {
     flex: 1,
+  },
+  text: {
     fontSize: 16,
   },
   textLight: {
@@ -274,6 +312,16 @@ const styles = StyleSheet.create({
   textCompleted: {
     textDecorationLine: 'line-through',
     opacity: 0.5,
+  },
+  timestamp: {
+    fontSize: 11,
+    marginTop: 2,
+  },
+  timestampLight: {
+    color: '#999',
+  },
+  timestampDark: {
+    color: '#666',
   },
   input: {
     flex: 1,

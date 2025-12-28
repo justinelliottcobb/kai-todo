@@ -224,6 +224,9 @@ This project uses Expo with prebuilt native projects, allowing you to build and 
 npm start
 # Press 'w' to open in browser
 
+# Run server to test online functionality
+npm run server
+
 # Production build
 npx expo export --platform web
 # Output in dist/ folder
@@ -270,6 +273,11 @@ After installing the APK, start the Metro bundler to serve the JavaScript bundle
 npm start
 ```
 The app will connect to Metro automatically when launched.
+
+Additionally, to test online functionality, run the server:
+```bash
+npm run server
+```
 
 **To speed up Windows builds:**
 ```powershell
