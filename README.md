@@ -287,6 +287,20 @@ org.gradle.caching=true
 org.gradle.configureondemand=true
 ```
 
+**Android Studio Emulator Note**
+
+Android Studio on Windows likes to open the emulator either off the viewable screen, or with a negative size. This is a known issue in the latest versions of Android Studio. The workaround is a follows:
+
+```
+# $HOME\.android\avd\emulator_model.avd
+window.x = 100 # <-- This value should be positive
+window.y = 100 # <-- This value should be positive
+window.scale = 0.250000 # <-- This value should be positive
+resizable.config.id = -1
+posture = 0
+uuid = 1766883837549
+```
+
 ### iOS (macOS only)
 
 **Option 1: Using Expo CLI**
