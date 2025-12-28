@@ -244,10 +244,32 @@ npx expo run:android
 4. Select your device/emulator from the dropdown
 5. Click the Run button (green play icon)
 
+**Option 3: Building and Installing Manually**
+1. `cd /kai-todo/android`
+2. `./gradlew.bat/assembleDebug`
+3. `cd /kai-todo/android/app/build/outputs/apk/debug`
+4. Run desired emulator in Android Studio
+5. `adb install app-debug/apk`
+6. In `kai-todo` root: `npm run start`
+
 **Emulator Setup:**
 1. In Android Studio: Tools → Device Manager
 2. Create a new virtual device (e.g., Pixel 7, API 34)
 3. Start the emulator before running the app
+
+**To speed up Windows builds:**
+```
+# Add Windows Defender exclusions (run as Admin)
+Add-MpPreference -ExclusionPath "C:\path\to\kai-todo"
+Add-MpPreference -ExclusionPath "$env:USERPROFILE\.gradle"
+Add-MpPreference -ExclusionProcess "java.exe"
+Add-MpPreference -ExclusionProcess "node.exe"
+
+# For Gradle specifically, add to android/gradle.properties:
+org.gradle.daemon=true
+org.gradle.caching=true
+org.gradle.configureondemand=true
+```
 
 ### iOS (macOS only)
 
