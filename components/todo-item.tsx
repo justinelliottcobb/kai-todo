@@ -28,8 +28,6 @@ interface TodoItemProps {
   onMoveDown?: () => void;
 }
 
-const relativeTimeFormatter = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' });
-
 function formatTimestamp(timestamp: number): string {
   const now = Date.now();
   const diffMs = now - timestamp;
@@ -37,10 +35,10 @@ function formatTimestamp(timestamp: number): string {
   const diffHours = Math.floor(diffMins / 60);
   const diffDays = Math.floor(diffHours / 24);
 
-  if (diffMins < 1) return relativeTimeFormatter.format(0, 'minute'); // "now" or equivalent
-  if (diffMins < 60) return relativeTimeFormatter.format(-diffMins, 'minute');
-  if (diffHours < 24) return relativeTimeFormatter.format(-diffHours, 'hour');
-  if (diffDays < 7) return relativeTimeFormatter.format(-diffDays, 'day');
+  if (diffMins < 1) return 'just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
 
   const date = new Date(timestamp);
   return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
