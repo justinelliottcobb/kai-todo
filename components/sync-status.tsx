@@ -96,7 +96,7 @@ export function SyncStatus({
             accessibilityLabel="Sync now"
             accessibilityRole="button"
           >
-            <Text style={[styles.syncButtonText, isDark ? styles.textDark : styles.textLight]}>
+            <Text style={[styles.syncButtonText]}>
               Sync Now
             </Text>
           </TouchableOpacity>
@@ -160,12 +160,11 @@ const styles = StyleSheet.create({
   },
   lastSyncDark: {
     color: '#999',
-  },
+  },  
   syncButton: {
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 6,
-    color: '#fff',
   },
   syncButtonLight: {
     backgroundColor: '#007aff',
