@@ -243,7 +243,7 @@ npx expo export --platform web
 # Navigate to android directory
 cd android
 
-# Build debug APK
+# Build debug APK (use gradlew.bat on Windows, ./gradlew on Linux/macOS)
 ./gradlew assembleDebug
 
 # APK location: android/app/build/outputs/apk/debug/app-debug.apk
@@ -270,6 +270,22 @@ After installing the APK, start the Metro bundler to serve the JavaScript bundle
 npm start
 ```
 The app will connect to Metro automatically when launched.
+
+**To speed up Windows builds:**
+```powershell
+# Add Windows Defender exclusions (run PowerShell as Admin)
+Add-MpPreference -ExclusionPath "C:\path\to\kai-todo"
+Add-MpPreference -ExclusionPath "$env:USERPROFILE\.gradle"
+Add-MpPreference -ExclusionProcess "java.exe"
+Add-MpPreference -ExclusionProcess "node.exe"
+```
+
+Add to `android/gradle.properties` for faster Gradle builds:
+```properties
+org.gradle.daemon=true
+org.gradle.caching=true
+org.gradle.configureondemand=true
+```
 
 ### iOS (macOS only)
 
