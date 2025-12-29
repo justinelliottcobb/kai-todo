@@ -16,6 +16,8 @@ A cross-platform todo application built with Expo and React Native, featuring of
 
 https://github.com/user-attachments/assets/a49228ec-25a5-4eca-a8cc-56474d5daf4b
 
+Note: This video demo shows new todo items being appended to the bottom of the list, that behavior has since been corrected to prepend new items to the top of the list. 
+
 ### Live Demo
 
 **[View Live Demo](https://kai-todo-web.onrender.com)**
