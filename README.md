@@ -5,15 +5,10 @@ A cross-platform todo application built with Expo and React Native, featuring of
 ## Screenshots, Live Demo, and Video Demonstration
 
 ### Screenshots in Emulator
-<img src="https://github.com/user-attachments/assets/9cf80395-2082-4cf8-913f-0e31b5cb9ab3" width="50%" alt="Kai-todo-list-dark-02" />
-<img src="https://github.com/user-attachments/assets/7bb7c931-cdde-44bb-bc5d-4b5c1aded6b8" width="50%" alet="kai-todo-settings-dark-02" />
-<img src="https://github.com/user-attachments/assets/b4d11513-3551-4afa-97a1-57d3e2b11650" width="50%" alt="kai-todo-settings-light-02" />
-<img src="https://github.com/user-attachments/assets/554fa517-10b6-43f4-b22f-6b0f7da68398" width="50%" alt="Kai-todo-list-light-02" />
-
-![Kai-todo-list-dark-02&#39;](https://github.com/user-attachments/assets/9cf80395-2082-4cf8-913f-0e31b5cb9ab3)
-![kai-todo-settings-dark-02](https://github.com/user-attachments/assets/7bb7c931-cdde-44bb-bc5d-4b5c1aded6b8)
-![kai-todo-settings-light-02](https://github.com/user-attachments/assets/b4d11513-3551-4afa-97a1-57d3e2b11650)
-![Kai-todo-list-light-02](https://github.com/user-attachments/assets/554fa517-10b6-43f4-b22f-6b0f7da68398)
+<img src="https://github.com/user-attachments/assets/9cf80395-2082-4cf8-913f-0e31b5cb9ab3" width="25%" alt="Kai-todo-list-dark-02" />
+<img src="https://github.com/user-attachments/assets/7bb7c931-cdde-44bb-bc5d-4b5c1aded6b8" width="25%" alet="kai-todo-settings-dark-02" />
+<img src="https://github.com/user-attachments/assets/b4d11513-3551-4afa-97a1-57d3e2b11650" width="25%" alt="kai-todo-settings-light-02" />
+<img src="https://github.com/user-attachments/assets/554fa517-10b6-43f4-b22f-6b0f7da68398" width="25%" alt="Kai-todo-list-light-02" />
 
 ### Video Demo
  - TBD
