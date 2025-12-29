@@ -11,11 +11,14 @@ A cross-platform todo application built with Expo and React Native, featuring of
 <img src="https://github.com/user-attachments/assets/554fa517-10b6-43f4-b22f-6b0f7da68398" width="200px" alt="Kai-todo-list-light-02" />
 
 ### Video Demo
- - TBD
+
+**Samsung Galaxy S22 Ultra:**
+
+https://github.com/user-attachments/assets/a49228ec-25a5-4eca-a8cc-56474d5daf4b
 
 ### Live Demo
 
-**[View Live Demo](https://kai-todo-web.onrender.com)** *(update with actual URL if different)*
+**[View Live Demo](https://kai-todo-web.onrender.com)**
 
 This app demonstrates **offline-first architecture**. When you first load the demo:
 
@@ -326,7 +329,7 @@ org.gradle.configureondemand=true
 
 **Android Studio Emulator Note**
 
-Android Studio on Windows likes to open the emulator either off the viewable screen, or with a negative size. This is a known issue in the latest versions of Android Studio. The workaround is a follows:
+Android Studio on Windows likes to open the emulator either off the viewable screen, or with a negative size. This is a known issue in the latest versions of Android Studio. The workaround is as follows:
 
 ```
 # $HOME\.android\avd\emulator_model.avd
