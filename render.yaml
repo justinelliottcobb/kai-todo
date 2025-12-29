@@ -1,0 +1,41 @@
+# Render Blueprint - Infrastructure as Code
+# https://render.com/docs/blueprint-spec
+
+services:
+  # JSON Server API backend
+  - type: web
+    name: kai-todo-api
+    runtime: node
+    region: oregon
+    plan: free
+    rootDir: server
+    buildCommand: npm install && cp -n db.json.example db.json || true
+    startCommand: npm start
+    healthCheckPath: /todos
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+  # Static web frontend
+  - type: web
+    name: kai-todo-web
+    runtime: static
+    region: oregon
+    plan: free
+    buildCommand: npm install && npx expo export --platform web
+    staticPublishPath: dist
+    pullRequestPreviewsEnabled: true
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: EXPO_PUBLIC_API_URL
+        fromService:
+          name: kai-todo-api
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL

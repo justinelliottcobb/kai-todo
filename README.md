@@ -14,7 +14,18 @@ A cross-platform todo application built with Expo and React Native, featuring of
  - TBD
 
 ### Live Demo
- - TBD
+
+**[View Live Demo](https://kai-todo-web.onrender.com)** *(update with actual URL if different)*
+
+This app demonstrates **offline-first architecture**. When you first load the demo:
+
+1. **Initial Load (Offline Mode)**: The server may take 30-60 seconds to wake up (free hosting cold start). During this time, the app works fully offline - you can create, edit, delete, and reorder todos immediately.
+
+2. **Server Connects**: Once the server wakes up, you'll see the status change from "Offline" to "Online". Any todos you created will sync automatically (if auto-sync is enabled) or you can tap "Sync Now" in manual mode.
+
+3. **Testing Offline Behavior**: Wait ~15 minutes for the server to sleep again, or simply use the app while the status shows "Offline" to experience the offline-first functionality.
+
+This cold start behavior actually showcases the core feature: **the app is fully functional without a server connection**, and seamlessly syncs when connectivity is restored.
 
 ## Features
 
@@ -420,19 +431,40 @@ npx expo doctor
 
 ## Deployment
 
-### Web (Netlify)
+### Web & API (Render)
 
-The project includes a `netlify.toml` configuration for automatic deployment:
+Both the web frontend and API server are deployed to Render using the included `render.yaml` Blueprint.
 
-1. Push to GitHub
-2. Connect your repo to Netlify
-3. Netlify auto-detects settings and deploys
+**Quick Setup:**
+1. Go to [Render Dashboard](https://dashboard.render.com)
+2. Click "New" → "Blueprint"
+3. Connect your GitHub repo
+4. Render auto-detects `render.yaml` and creates both services:
+   - **kai-todo-web**: Static site (frontend)
+   - **kai-todo-api**: Web service (json-server backend)
+5. The web frontend automatically gets the API URL via `EXPO_PUBLIC_API_URL`
 
-Or deploy manually:
-```bash
-npx expo export --platform web
-# Upload dist/ folder to any static host
-```
+**What Gets Deployed:**
+
+| Service | Type | URL Pattern |
+|---------|------|-------------|
+| kai-todo-web | Static Site | `https://kai-todo-web.onrender.com` |
+| kai-todo-api | Web Service | `https://kai-todo-api.onrender.com` |
+
+**Optional: CI/CD Deploy Hooks**
+
+Render auto-deploys when you push to main (if connected to GitHub). For additional control via GitHub Actions, add deploy hooks:
+
+1. In Render, go to each service → Settings → "Deploy Hook"
+2. In GitHub repo → Settings → Secrets → Actions, add:
+   - `RENDER_DEPLOY_HOOK_API` = API service deploy hook URL
+   - `RENDER_DEPLOY_HOOK_WEB` = Web service deploy hook URL
+
+**Free Tier Notes:**
+- Services spin down after 15 minutes of inactivity
+- First request after spin-down takes 30-60 seconds (cold start)
+- This is intentional for the demo - see [Live Demo](#live-demo) section
+- Data in `db.json` persists between requests but resets on redeploy
 
 ### Mobile App Stores
 

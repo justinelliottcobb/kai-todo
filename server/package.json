@@ -1,0 +1,15 @@
+{
+  "name": "kai-todo-server",
+  "version": "1.0.0",
+  "description": "JSON Server backend for Kai Todo app",
+  "scripts": {
+    "start": "json-server --host 0.0.0.0 --port $PORT db.json",
+    "dev": "json-server --port 3001 --watch db.json"
+  },
+  "dependencies": {
+    "json-server": "^0.17.4"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

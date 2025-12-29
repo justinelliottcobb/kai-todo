@@ -60,3 +60,30 @@ jobs:
           name: web-build
           path: dist/
           retention-days: 7
+
+  deploy:
+    name: Deploy to Render
+    runs-on: ubuntu-latest
+    needs: [lint-and-test, build-web]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Trigger Render Deploy
+        env:
+          RENDER_DEPLOY_HOOK_API: ${{ secrets.RENDER_DEPLOY_HOOK_API }}
+          RENDER_DEPLOY_HOOK_WEB: ${{ secrets.RENDER_DEPLOY_HOOK_WEB }}
+        run: |
+          # Note: If using Render Blueprint with GitHub integration,
+          # Render auto-deploys on push and these hooks are optional.
+
+          if [ -n "$RENDER_DEPLOY_HOOK_API" ]; then
+            curl -sS "$RENDER_DEPLOY_HOOK_API" && echo "API deploy triggered"
+          else
+            echo "RENDER_DEPLOY_HOOK_API not set, skipping (Render may auto-deploy)"
+          fi
+
+          if [ -n "$RENDER_DEPLOY_HOOK_WEB" ]; then
+            curl -sS "$RENDER_DEPLOY_HOOK_WEB" && echo "Web deploy triggered"
+          else
+            echo "RENDER_DEPLOY_HOOK_WEB not set, skipping (Render may auto-deploy)"
+          fi
