@@ -2,6 +2,20 @@
 
 A cross-platform todo application built with Expo and React Native, featuring offline-first data persistence with MMKV and online synchronization with a REST API.
 
+## Screenshots, Live Demo, and Video Demonstration
+
+### Screenshots in Emulator
+![kai-todo-settings-dark-02](https://github.com/user-attachments/assets/7bb7c931-cdde-44bb-bc5d-4b5c1aded6b8)
+![Kai-todo-list-dark-02&#39;](https://github.com/user-attachments/assets/9cf80395-2082-4cf8-913f-0e31b5cb9ab3)
+![kai-todo-settings-light-02](https://github.com/user-attachments/assets/b4d11513-3551-4afa-97a1-57d3e2b11650)
+![Kai-todo-list-light-02](https://github.com/user-attachments/assets/554fa517-10b6-43f4-b22f-6b0f7da68398)
+
+### Video Demo
+ - TBD
+
+### Live Demo
+ - TBD
+
 ## Features
 
 - **Todo Management**: Create, edit, delete, and reorder todos with drag-and-drop
