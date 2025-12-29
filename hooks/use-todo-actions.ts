@@ -2,15 +2,17 @@ import { useCallback } from 'react';
 import { Todo } from '@/types/todo';
 import { generateId } from '@/utils/uuid';
 import { addPendingDelete } from '@/services/sync';
+import { MAX_TODO_COUNT } from '@/constants/app';
 
 const MAX_TODO_LENGTH = 500;
 
 export interface TodoValidationError {
-  type: 'empty' | 'too_long' | 'whitespace_only';
+  type: 'empty' | 'too_long' | 'whitespace_only' | 'limit_reached';
   message: string;
 }
 
 export interface UseTodoActionsOptions {
+  todos: Todo[];
   setTodos: React.Dispatch<React.SetStateAction<Todo[]>>;
 }
 
@@ -47,8 +49,13 @@ export function validateTodoText(text: string): TodoValidationError | null {
 /**
  * Hook providing CRUD operations for todos with input validation.
  */
-export function useTodoActions({ setTodos }: UseTodoActionsOptions): UseTodoActionsReturn {
+export function useTodoActions({ todos, setTodos }: UseTodoActionsOptions): UseTodoActionsReturn {
   const addTodo = useCallback((text: string): TodoValidationError | null => {
+    // Check todo count limit
+    if (MAX_TODO_COUNT > 0 && todos.length >= MAX_TODO_COUNT) {
+      return { type: 'limit_reached', message: `Cannot add more than ${MAX_TODO_COUNT} todos` };
+    }
+
     const trimmedText = text.trim();
     const validationError = validateTodoText(trimmedText);
 
@@ -58,19 +65,24 @@ export function useTodoActions({ setTodos }: UseTodoActionsOptions): UseTodoActi
 
     const now = Date.now();
     setTodos((prevTodos) => {
+      // Shift existing todos down (increment order) to make room at the top
+      const shiftedTodos = prevTodos.map((todo) => ({
+        ...todo,
+        order: todo.order + 1,
+      }));
       const newTodo: Todo = {
         id: generateId(),
         text: trimmedText,
         completed: false,
         createdAt: now,
         updatedAt: now,
-        order: prevTodos.length > 0 ? Math.max(...prevTodos.map((t) => t.order)) + 1 : 0,
+        order: 0,
       };
-      return [newTodo, ...prevTodos];
+      return [newTodo, ...shiftedTodos];
     });
 
     return null;
-  }, [setTodos]);
+  }, [todos.length, setTodos]);
 
   const toggleTodo = useCallback((id: string) => {
     setTodos((prevTodos) =>

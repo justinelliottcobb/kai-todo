@@ -72,7 +72,7 @@ export function useTodos(): UseTodosReturn {
     deleteTodo,
     editTodo,
     reorderTodos,
-  } = useTodoActions({ setTodos });
+  } = useTodoActions({ todos, setTodos });
 
   // Sync hook manages server synchronization
   const {
