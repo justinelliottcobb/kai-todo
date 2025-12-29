@@ -20,7 +20,6 @@ services:
   - type: web
     name: kai-todo-web
     runtime: static
-    region: oregon
     plan: free
     buildCommand: npm install && npx expo export --platform web
     staticPublishPath: dist
