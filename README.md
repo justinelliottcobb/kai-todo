@@ -20,15 +20,17 @@ https://github.com/user-attachments/assets/a49228ec-25a5-4eca-a8cc-56474d5daf4b
 
 **[View Live Demo](https://kai-todo-web.onrender.com)**
 
-This app demonstrates **offline-first architecture**. When you first load the demo:
+This app demonstrates **offline-first architecture**. When the demo is first loaded:
 
 1. **Initial Load (Offline Mode)**: The server may take 30-60 seconds to wake up (free hosting cold start). During this time, the app works fully offline - you can create, edit, delete, and reorder todos immediately.
 
-2. **Server Connects**: Once the server wakes up, you'll see the status change from "Offline" to "Online". Any todos you created will sync automatically (if auto-sync is enabled) or you can tap "Sync Now" in manual mode.
+2. **Server Connects**: Once the server wakes up, you'll see the status change from "Offline" to "Online". Any todos you created will sync automatically (if auto-sync is enabled) or you can tap "Sync Now" in manual mode. This will also load and integrate any server-side todo items absent from MMKV local storage.
 
 3. **Testing Offline Behavior**: Wait ~15 minutes for the server to sleep again, or simply use the app while the status shows "Offline" to experience the offline-first functionality.
 
-This cold start behavior actually showcases the core feature: **the app is fully functional without a server connection**, and seamlessly syncs when connectivity is restored.
+This cold start behavior showcases the core feature request: **the app is fully functional without a server connection**, and syncs when connectivity is restored.
+
+Note: The app is limited (configurably) to 50 todo items for the sake of demonstration.
 
 ## Features
 
